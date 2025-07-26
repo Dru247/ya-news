@@ -1,5 +1,8 @@
 """Фиктуры тестов."""
+from datetime import datetime, timedelta
+
 import pytest
+from django.conf import settings
 from django.test.client import Client
 
 from news.models import Comment, News
@@ -64,3 +67,31 @@ def comment(news, author):
 def pk_comment_for_args(comment):
     """Возващает PK комментария для аргуумента."""
     return (comment.id,)
+
+
+@pytest.fixture
+def create_many_news():
+    """Создаёт несколько объектов News."""
+    today = datetime.today()
+    News.objects.bulk_create(
+        News(
+            title=f'Новость {index}',
+            text='Просто текст.',
+            date=today - timedelta(days=index)
+        ) for index in range(settings.NEWS_COUNT_ON_HOME_PAGE + 1)
+    )
+
+
+@pytest.fixture
+def create_many_comments(news, author):
+    """Создаёт несколько объектов Comment."""
+    number_comments = 10
+    today = datetime.today()
+    Comment.objects.bulk_create(
+        Comment(
+            news=news,
+            author=author,
+            text='Просто текст.',
+            created=today - timedelta(days=index)
+        ) for index in range(number_comments)
+    )
