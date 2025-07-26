@@ -44,6 +44,12 @@ def news():
 
 
 @pytest.fixture
+def pk_news_for_args(news):
+    """Возващает PK новости для аргуумента."""
+    return (news.id,)
+
+
+@pytest.fixture
 def comment(news, author):
     """Создаёт и возвращает объект комментария."""
     comment = Comment.objects.create(
@@ -55,6 +61,6 @@ def comment(news, author):
 
 
 @pytest.fixture
-def pk_news_for_args(news):
-    """Возващает PK новости для аргуумента."""
-    return (news.id,)
+def pk_comment_for_args(comment):
+    """Возващает PK комментария для аргуумента."""
+    return (comment.id,)
