@@ -95,3 +95,8 @@ def create_many_comments(news, author):
             created=today - timedelta(days=index)
         ) for index in range(number_comments)
     )
+
+
+@pytest.fixture
+def form_data():
+    return {'text': 'Тест текст'}
