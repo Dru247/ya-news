@@ -99,4 +99,4 @@ def create_many_comments(news, author):
 
 @pytest.fixture
 def form_data():
-    return {'text': 'Тест текст'}
+    return {'text': 'Новый текст'}
