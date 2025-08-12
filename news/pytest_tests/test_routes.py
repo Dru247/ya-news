@@ -40,7 +40,7 @@ def test_pages_availability_for_anonymous_user(client, name, args):
     ('news:edit', 'news:delete'),
 )
 def test_pages_availability_for_different_users(
-    parametrized_client, name, pk_comment_for_args, expected_status
+    parametrized_client, expected_status, name, pk_comment_for_args
 ):
     """Тест доступности изменения и удаления комментария."""
     url = reverse(name, args=pk_comment_for_args)
@@ -50,16 +50,13 @@ def test_pages_availability_for_different_users(
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    'name, args',
-    (
-        ('news:edit', lf('pk_comment_for_args')),
-        ('news:delete', lf('pk_comment_for_args'))
-    ),
+    'name',
+    ('news:edit', 'news:delete')
 )
-def test_redirects(client, name, args):
+def test_redirects(client, name, pk_comment_for_args):
     """Тест редиректа."""
     login_url = reverse('users:login')
-    url = reverse(name, args=args)
+    url = reverse(name, args=pk_comment_for_args)
     expected_url = f'{login_url}?next={url}'
     response = client.get(url)
     assertRedirects(response, expected_url)
