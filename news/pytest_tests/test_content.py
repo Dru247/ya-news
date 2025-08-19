@@ -1,4 +1,4 @@
-"""Тест контента."""
+"""Тесты контента."""
 import pytest
 
 from django.conf import settings

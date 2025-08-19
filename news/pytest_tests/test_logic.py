@@ -4,9 +4,8 @@ from http import HTTPStatus
 import pytest
 from django.urls import reverse
 from pytest_django.asserts import assertFormError, assertRedirects
-from pytils.translit import slugify
 
-# from notes.forms import WARNING
+from news.forms import BAD_WORDS, WARNING
 from news.models import Comment
 
 
@@ -74,10 +73,24 @@ def test_author_can_delete_comment(author_client, pk_comment_for_args):
 
 
 def test_other_user_cant_delete_comment(
-    not_author_client, pk_comment_for_args, pk_news_for_args
+    not_author_client, pk_comment_for_args
 ):
     """Тест не автор не может удалять комментарий."""
     url = reverse('news:delete', args=pk_comment_for_args)
     response = not_author_client.post(url)
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert Comment.objects.count() == 1
+
+
+def test_user_cant_use_bad_words(author_client, pk_news_for_args):
+    """Вывоз исключения при наличии запрещённых слов в комментарии."""
+    url = reverse('news:detail', args=pk_news_for_args)
+    bad_words_data = {'text': f'Какой-то текст, {BAD_WORDS[0]}, еще текст'}
+    response = author_client.post(url, data=bad_words_data)
+    form = response.context['form']
+    assertFormError(
+        form=form,
+        field='text',
+        errors=WARNING
+    )
+    assert Comment.objects.count() == 0
