@@ -1,37 +1,32 @@
 """Тесты контента."""
 import pytest
-
 from django.conf import settings
-from django.urls import reverse
 
 from news.forms import CommentForm
 
+pytestmark = pytest.mark.django_db
 
-@pytest.mark.django_db
-def test_news_count(client, create_many_news):
+
+def test_news_count(client, get_urls, create_many_news):
     """Тест кол-ва новостей на домашней странице."""
-    url = reverse('news:home')
+    url = get_urls['news_home']
     response = client.get(url)
-    object_list = response.context['object_list']
-    news_count = object_list.count()
+    news_count = response.context['object_list'].count()
     assert news_count == settings.NEWS_COUNT_ON_HOME_PAGE
 
 
-@pytest.mark.django_db
-def test_news_order(client, create_many_news):
+def test_news_order(client, get_urls, create_many_news):
     """Проверка сортировки записей на домашней странице."""
-    url = reverse('news:home')
+    url = get_urls['news_home']
     response = client.get(url)
-    object_list = response.context['object_list']
-    all_dates = [news.date for news in object_list]
+    all_dates = [news.date for news in response.context['object_list']]
     sorted_dates = sorted(all_dates, reverse=True)
     assert all_dates == sorted_dates
 
 
-@pytest.mark.django_db
-def test_comments_order(client, pk_news_for_args, create_many_comments):
+def test_comments_order(client, get_urls, create_many_comments):
     """Тест сортировки комментарий по дате."""
-    url = reverse('news:detail', args=pk_news_for_args)
+    url = get_urls['news_detail']
     response = client.get(url)
     assert 'news' in response.context
     news = response.context['news']
@@ -41,17 +36,16 @@ def test_comments_order(client, pk_news_for_args, create_many_comments):
     assert all_timestamps == sorted_timestamps
 
 
-@pytest.mark.django_db
-def test_anonymous_client_has_no_form(client, pk_news_for_args):
+def test_anonymous_client_has_no_form(client, get_urls):
     """Тест отсутствия Формы для анонимного пользователя."""
-    url = reverse('news:detail', args=pk_news_for_args)
+    url = get_urls['news_detail']
     response = client.get(url)
     assert 'form' not in response.context
 
 
-def test_authorized_client_has_form(not_author_client, pk_news_for_args):
+def test_authorized_client_has_form(not_author_client, get_urls):
     """Тест присутствия Формы для авторизированного пользователя."""
-    url = reverse('news:detail', args=pk_news_for_args)
+    url = get_urls['news_detail']
     response = not_author_client.get(url)
     assert 'form' in response.context
     assert isinstance(response.context['form'], CommentForm)

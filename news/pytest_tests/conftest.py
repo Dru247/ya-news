@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import pytest
 from django.conf import settings
 from django.test.client import Client
+from django.urls import reverse
 
 from news.models import Comment, News
 
@@ -47,12 +48,6 @@ def news():
 
 
 @pytest.fixture
-def pk_news_for_args(news):
-    """Возващает PK новости для аргуумента."""
-    return (news.id,)
-
-
-@pytest.fixture
 def comment(news, author):
     """Создаёт и возвращает объект комментария."""
     comment = Comment.objects.create(
@@ -61,12 +56,6 @@ def comment(news, author):
         text='Текст комментария'
     )
     return comment
-
-
-@pytest.fixture
-def pk_comment_for_args(comment):
-    """Возващает PK комментария для аргуумента."""
-    return (comment.id,)
 
 
 @pytest.fixture
@@ -97,6 +86,14 @@ def create_many_comments(news, author):
     )
 
 
-@pytest.fixture
-def form_data():
-    return {'text': 'Новый текст'}
+@pytest.fixture()
+def get_urls(news, comment):
+    return {
+        'news_home': reverse('news:home'),
+        'news_detail': reverse('news:detail', args=(news.pk,)),
+        'comment_edit': reverse('news:edit', args=(comment.pk,)),
+        'comment_delete': reverse('news:delete', args=(comment.pk,)),
+        'users_login': reverse('users:login'),
+        'users_logout': reverse('users:logout'),
+        'users_signup': reverse('users:signup')
+    }
