@@ -36,9 +36,7 @@ def test_anonymous_user_cant_create_comment(client, get_urls):
     assert first_comment_count == second_comment_count
 
 
-def test_author_can_edit_comment(
-        author, author_client, news, get_urls, comment
-):
+def test_author_can_edit_comment(author_client, get_urls, comment):
     """Тест автор может изменить комментарий."""
     response = author_client.post(get_urls['comment_edit'], FORM_DATA)
     assertRedirects(
@@ -47,20 +45,18 @@ def test_author_can_edit_comment(
     )
     edit_comment = Comment.objects.get(pk=comment.pk)
     assert edit_comment.text == FORM_DATA['text']
-    assert edit_comment.author == author
-    assert edit_comment.news == news
+    assert edit_comment.author == comment.author
+    assert edit_comment.news == comment.news
 
 
-def test_other_user_cant_edit_comment(
-        author, not_author_client, news, comment, get_urls
-):
+def test_other_user_cant_edit_comment(not_author_client, comment, get_urls):
     """Тест не автор не может изменить комментарий."""
     response = not_author_client.post(get_urls['comment_edit'], FORM_DATA)
     assert response.status_code == Status.NOT_FOUND
     edit_comment = Comment.objects.get(pk=comment.pk)
     assert edit_comment.text == comment.text
-    assert edit_comment.author == author
-    assert edit_comment.news == news
+    assert edit_comment.author == comment.author
+    assert edit_comment.news == comment.news
 
 
 def test_author_can_delete_comment(author_client, get_urls):

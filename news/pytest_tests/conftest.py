@@ -1,10 +1,11 @@
 """Фиктуры тестов."""
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import pytest
 from django.conf import settings
 from django.test.client import Client
 from django.urls import reverse
+from django.utils import timezone
 
 from news.models import Comment, News
 
@@ -61,7 +62,7 @@ def comment(news, author):
 @pytest.fixture
 def create_many_news():
     """Создаёт несколько объектов News."""
-    today = datetime.today()
+    today = timezone.now()
     News.objects.bulk_create(
         News(
             title=f'Новость {index}',
@@ -75,15 +76,15 @@ def create_many_news():
 def create_many_comments(news, author):
     """Создаёт несколько объектов Comment."""
     number_comments = 10
-    today = datetime.today()
-    Comment.objects.bulk_create(
-        Comment(
+    today = timezone.now()
+    for index in range(number_comments):
+        comment = Comment.objects.create(
             news=news,
             author=author,
-            text='Просто текст.',
-            created=today - timedelta(days=index)
-        ) for index in range(number_comments)
-    )
+            text='Просто текст.'
+        )
+        comment.created = today - timedelta(days=index)
+        comment.save()
 
 
 @pytest.fixture()
